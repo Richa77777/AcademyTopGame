@@ -16,8 +16,6 @@ public class PlayerCamera : MonoBehaviour
 
     private void Awake()
     {
-        Application.targetFrameRate = -1;
-
         _mainCamera = Camera.main;
 
         Cursor.visible = false;
