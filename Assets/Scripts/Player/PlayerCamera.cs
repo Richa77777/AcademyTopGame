@@ -12,23 +12,32 @@ public class PlayerCamera : MonoBehaviour
 
     [SerializeField] private Transform _orientation;
 
+    private Camera _mainCamera;
+
     private void Awake()
     {
+        Application.targetFrameRate = -1;
+
+        _mainCamera = Camera.main;
+
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+
+        _xRotation = _mainCamera.transform.rotation.eulerAngles.x;
+        _yRotation = _mainCamera.transform.rotation.eulerAngles.y;
     }
 
     private void Update()
     {
-        float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * _sensX;
-        float mouseY = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * _sensY;
+        float mouseX = Input.GetAxisRaw("Mouse X") * _sensX * Time.fixedDeltaTime;
+        float mouseY = Input.GetAxisRaw("Mouse Y") * _sensY * Time.fixedDeltaTime;
 
         _yRotation += mouseX;
         _xRotation -= mouseY;
 
         _xRotation = Mathf.Clamp(_xRotation, -90f, 90f);
 
-        transform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0f);
+        _mainCamera.transform.rotation = Quaternion.Euler(_xRotation, _yRotation, 0f);
         _orientation.rotation = Quaternion.Euler(0f, _yRotation, 0f);
     }
 }
