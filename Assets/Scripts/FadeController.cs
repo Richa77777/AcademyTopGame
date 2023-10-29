@@ -7,8 +7,9 @@ public class FadeController : MonoBehaviour
     public static FadeController Instance;
 
     [SerializeField] private CanvasGroup _fadeCanvas;
+    [SerializeField] private float _fadeTime = 1f;
 
-    private const float FadeTime = 1f;
+    public float FadeTime => _fadeTime;
 
     private void Awake()
     {
@@ -35,19 +36,18 @@ public class FadeController : MonoBehaviour
 
     private IEnumerator Fade(bool isIn)
     {
-        if (isIn == true)
-        {
-            _fadeCanvas.gameObject.SetActive(true);
-        }
+        _fadeCanvas.gameObject.SetActive(true);
 
         float targetValue = isIn ? 1f : 0f;
         float startValue = targetValue == 1f ? 0f : 1f;
 
         _fadeCanvas.alpha = startValue;
 
-        for (float t = 0f; t < FadeTime; t += Time.deltaTime)
+        yield return new WaitForSeconds(0.1f);
+
+        for (float t = 0f; t < _fadeTime; t += Time.deltaTime)
         {
-            _fadeCanvas.alpha = Mathf.Lerp(startValue, targetValue, t / FadeTime);
+            _fadeCanvas.alpha = Mathf.Lerp(startValue, targetValue, t / _fadeTime);
             yield return null;
         }
 
