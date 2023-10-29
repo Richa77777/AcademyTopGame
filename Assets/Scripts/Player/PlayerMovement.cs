@@ -23,20 +23,24 @@ public class PlayerMovement : MonoBehaviour
 
     private bool _readyToJump = true;
     private bool _isGrounded;
-    private bool _isSprinting;
 
     private Vector3 _moveDirection;
+
     private Rigidbody _rigidbody;
     private Collider _collider;
+    private Camera _mainCamera;
+
+    private Coroutine _sprintViewCor;
 
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
 
+        _mainCamera = Camera.main;
         _rigidbody.freezeRotation = true;
-
         _currentMoveSpeed = _moveSpeed;
+
     }
 
     private void Update()
@@ -59,11 +63,25 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKeyDown(_sprintKey) && _isGrounded == true)
         {
             _currentMoveSpeed = _moveSpeed * _sprintMultiplier;
+
+            if (_sprintViewCor != null)
+            {
+                StopCoroutine(_sprintViewCor);
+            }
+
+            _sprintViewCor = StartCoroutine(SprintViewCor(70f));
         }
 
         if (Input.GetKeyUp(_sprintKey))
         {
             _currentMoveSpeed = _moveSpeed;
+
+            if (_sprintViewCor != null)
+            {
+                StopCoroutine(_sprintViewCor);
+            }
+
+            _sprintViewCor = StartCoroutine(SprintViewCor(60f));
         }
 
         if (_isGrounded == true)
@@ -102,13 +120,26 @@ public class PlayerMovement : MonoBehaviour
             _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, 0f, _rigidbody.velocity.z);
             _rigidbody.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
             _readyToJump = false;
-            StartCoroutine(ResetJump());
+            StartCoroutine(ResetJumpCor());
         }
     }
 
-    private IEnumerator ResetJump()
+    private IEnumerator ResetJumpCor()
     {
         yield return new WaitForSeconds(_jumpCooldown);
         _readyToJump = true;
+    }
+
+    private IEnumerator SprintViewCor(float targetValue)
+    {
+        float startValue = _mainCamera.fieldOfView;
+
+        for (float t = 0; t < 0.15f; t += Time.deltaTime)
+        {
+            _mainCamera.fieldOfView = Mathf.Lerp(startValue, targetValue, t / 0.15f);
+            yield return null;
+        }
+
+        _mainCamera.fieldOfView = targetValue;
     }
 }
